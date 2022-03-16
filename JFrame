@@ -1,0 +1,31 @@
+      //Creating frame
+      JFrame frame = new JFrame("Maosweeper");
+      frame.setSize(600, 600);
+      //Close frame when close button is pressed
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      
+      JPanel p = new JPanel();
+      p.setLayout(new FlowLayout());
+      label1 = new JLabel("no event ");
+      p.add(label1);
+      
+      frame.add(p);
+      frame.show();
+      
+      Mouse m = new Mouse();
+      frame.addMouseListener(m);
+      
+      
+      //Creating Menu Bar and components
+      JMenuBar mb = new JMenuBar();
+      JMenu m1 = new JMenu("Game");
+      JMenu m2 = new JMenu("Themes");
+      JMenu m3 = new JMenu("Help");
+      
+      JMenuItem m11 = new JMenuItem("New Game");
+      JMenuItem m22 = new JMenuItem("Quit Game");
+      m1.add(m11);
+      m1.add(m22);
+      
+      frame.getContentPane().add(BorderLayout.NORTH, mb);
+      frame.setVisible(true);
