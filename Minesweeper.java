@@ -4,16 +4,18 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.WindowConstants;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-class Board extends JPanel {
-   
+/**
+ * 
+ * @author Jaime Xu
+ * @version 12/12/22
+ */
+class Minesweeper extends JComponent implements Runnable {
    /** 2D Array of Tile objects */
    private static Tile[][] TILES;
    /** 2D Array representing the location of each mine */
@@ -50,9 +52,48 @@ class Board extends JPanel {
    private JLabel GAME_WIN;
    /** Displays game lost */
    private JLabel GAME_LOSE;
+
+   private JFrame frame;
+   private JPanel panel;
+
+   private class MouseListener extends MouseAdapter {
+      private int x;
+      private int y;
+      @Override
+      public void mouseClicked(MouseEvent e) {
+         x = e.getX();
+         y = e.getY();
+         System.out.println("User clicked: " + x + ", " + y);
+         for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+               if (e.getButton() == MouseEvent.BUTTON1 && GAME_OVER == false) {
+                  if (TILES[i][j].isClicked(x, y) && TILES[i][j].getStatus().equals("covered")) {
+                     clearTile(TILES[i][j]);
+                  }
+               } else if (e.getButton() == MouseEvent.BUTTON3 && GAME_OVER == false) {
+                  if (TILES[i][j].isClicked(x, y)) {
+                     flagTile(TILES[i][j]);
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   public static void main(String[] args) { SwingUtilities.invokeLater(new Minesweeper()); }
    
-   public Board() throws FileNotFoundException {
-      addMouseListener(new MaoListener());
+   public Minesweeper() {
+      frame = new JFrame("Minesweeper");
+      frame.setSize(1000, 500);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      frame.setResizable(false);
+      frame.setLocationRelativeTo(null);
+      panel = new JPanel();
+      frame.add(panel);
+   }
+
+   public void run() {
+      panel.addMouseListener(new MouseListener());
       initCB();
       Music m = new Music(THEME);
       m.playMusic();
@@ -74,8 +115,8 @@ class Board extends JPanel {
    public void initCB() {
       themesCB = new JComboBox(THEMES);
       difficultiesCB = new JComboBox(DIFFICULTIES);
-      add(themesCB);
-      add(difficultiesCB);
+      panel.add(themesCB);
+      panel.add(difficultiesCB);
       themesCB.addActionListener(new ActionListener() {
          @Override
          public void actionPerformed(ActionEvent e) {
@@ -88,12 +129,9 @@ class Board extends JPanel {
          @Override
          public void actionPerformed(ActionEvent e) {
             String selectedDiff = (String) difficultiesCB.getSelectedItem();
-            if (selectedDiff.equals("Beginner"))
-               chooseGame("beginner");
-            if (selectedDiff.equals("Intermediate"))
-               chooseGame("intermediate");
-            if (selectedDiff.equals("Expert"))
-               chooseGame("expert");
+            if (selectedDiff.equals("Beginner")) chooseGame("beginner");
+            if (selectedDiff.equals("Intermediate")) chooseGame("intermediate");
+            if (selectedDiff.equals("Expert")) chooseGame("expert");
             newGame();
          }
       });
@@ -156,35 +194,6 @@ class Board extends JPanel {
          e.printStackTrace();
       }
       return img;
-   }
-
-   /** Mouse listener object */
-   private class MaoListener extends MouseAdapter {
-      /** x location of click */
-      private int x;
-      /** y location of click */
-      private int y;
-      /** Called whenever the mouse is clicked
-      * @param e Mouse event called */
-      @Override
-      public void mouseClicked(MouseEvent e) {
-         x = e.getX();
-         y = e.getY();
-         System.out.println("User clicked: " + x + ", " + y);
-         for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-               if (e.getButton() == MouseEvent.BUTTON1 && GAME_OVER == false) {
-                  if (TILES[i][j].isClicked(x, y) && TILES[i][j].getStatus().equals("covered")) {
-                     clearTile(TILES[i][j]);
-                  }
-               } else if (e.getButton() == MouseEvent.BUTTON3 && GAME_OVER == false) {
-                  if (TILES[i][j].isClicked(x, y)) {
-                     flagTile(TILES[i][j]);
-                  }
-               }
-            }
-         }
-      }
    }
    
    /** Chooses the field size */
@@ -343,6 +352,7 @@ class Board extends JPanel {
    * @param col The current column
    * @return The number of neighboring mines */
    public static int findNeighbors(int row, int col) {
+      // TODO: change to switch statement
       int neighbors = 0;
       if (row > 0) {
          if (col > 0) {
